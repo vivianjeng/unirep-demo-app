@@ -62,7 +62,7 @@ export default observer(() => {
                     </div>
                     <div className="info-item">
                         <div>Current epoch #</div>
-                        <div className="stat">{userContext.calEpoch}</div>
+                        <div className="stat">{userContext.calEpoch()}</div>
                     </div>
                     <div className="info-item">
                         <div>Remaining time</div>
@@ -221,7 +221,7 @@ export default observer(() => {
                             onClick={async () => {
                                 if (
                                     userContext.id &&
-                                    userContext.calEpoch !==
+                                    userContext.calEpoch() !==
                                         userContext.latestTransitionedEpoch
                                 ) {
                                     throw new Error('Needs transition')

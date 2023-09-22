@@ -11,10 +11,11 @@
     },
     "scripts": {
         "start": "webpack-dev-server",
-        "build": "webpack",
+        "build": "yarn copyCircuits && webpack",
         "lint": "prettier .",
         "lint:fix": "prettier . --write",
-        "lint:check": "prettier . --check"
+        "lint:check": "prettier . --check",
+        "copyCircuits": "cp public/* build"
     },
     "dependencies": {
         "@cloudflare/kv-asset-handler": "^0.2.0",

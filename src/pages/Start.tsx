@@ -9,7 +9,6 @@ import User from '../contexts/User'
 
 export default observer(() => {
     const userContext = React.useContext(User)
-    console.log(userContext.hasSignedUp)
 
     return (
         <>

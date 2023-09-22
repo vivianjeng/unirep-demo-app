@@ -26,7 +26,7 @@ class User {
     provableData: bigint[] = Array(FIELD_COUNT).fill(BigInt(0))
     provider: any
     startTimestamp: number = 0
-    epochLength: number = 300
+    epochLength: number = 60
     attesterId: string = '1234'
     id: Identity = new Identity()
 
@@ -50,9 +50,12 @@ class User {
                 ? BigInt(provableData)
                 : BigInt(0)
         }
+        this.latestTransitionedEpoch = Number(
+            localStorage.getItem('latestTransitionedEpoch'),
+        )
     }
 
-    get calEpoch() {
+    calEpoch() {
         const currentTimestamp = Math.floor(+new Date() / 1000)
         if (!this.startTimestamp) {
             const _timestamp = localStorage.getItem('startTimestamp')
@@ -75,7 +78,7 @@ class User {
     }
 
     get calRemainingTime() {
-        const epoch = this.calEpoch
+        const epoch = this.calEpoch()
         const timestamp = Math.floor(+new Date() / 1000)
         const epochEnd = this.startTimestamp + (epoch + 1) * this.epochLength
         return Math.max(0, epochEnd - timestamp)
@@ -98,14 +101,18 @@ class User {
     }
 
     epochKey(nonce: number) {
-        const epoch = this.calEpoch
+        const epoch = this.calEpoch()
         const key = genEpochKey(this.id.secret, this.attesterId, epoch, nonce)
         return `0x${key.toString(16)}`
     }
 
     signup() {
         this.hasSignedUp = true
-        this.latestTransitionedEpoch = this.calEpoch
+        this.latestTransitionedEpoch = this.calEpoch()
+        localStorage.setItem(
+            'latestTransitionedEpoch',
+            this.latestTransitionedEpoch.toString(),
+        )
     }
 
     requestData(reqData: { [key: number]: string | number }) {
@@ -137,11 +144,15 @@ class User {
                 this.provableData[i].toString(),
             )
         }
-        this.latestTransitionedEpoch = this.calEpoch
+        this.latestTransitionedEpoch = this.calEpoch()
+        localStorage.setItem(
+            'latestTransitionedEpoch',
+            this.latestTransitionedEpoch.toString(),
+        )
     }
 
     async proveData(data: { [key: number]: string | number }) {
-        const epoch = this.calEpoch
+        const epoch = this.calEpoch()
         const stateTree = new IncrementalMerkleTree(STATE_TREE_DEPTH)
         const leaf = genStateTreeLeaf(
             this.id.secret,
