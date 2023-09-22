@@ -9,14 +9,7 @@ import User from '../contexts/User'
 
 export default observer(() => {
     const userContext = React.useContext(User)
-
-    // if (!userContext.userState) {
-    //     return (
-    //     <div className="container">
-    //         Loading...
-    //     </div>
-    //     )
-    // }
+    console.log(userContext.hasSignedUp)
 
     return (
         <>
@@ -44,11 +37,11 @@ export default observer(() => {
                     {!userContext.hasSignedUp ? (
                         <Button
                             onClick={() => {
-                                if (!userContext.userState) return
+                                if (userContext.hasSignedUp) return
                                 return userContext.signup()
                             }}
                         >
-                            {userContext.userState ? 'Join' : 'Initializing...'}
+                            {'Join'}
                             <span style={{ marginLeft: '12px' }}>
                                 <img
                                     src={require('../../public/arrow.svg')}

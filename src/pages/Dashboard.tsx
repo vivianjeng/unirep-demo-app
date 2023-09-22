@@ -33,11 +33,7 @@ export default observer(() => {
     })
 
     const updateTimer = () => {
-        if (!userContext.userState) {
-            setRemainingTime('Loading...')
-            return
-        }
-        const time = userContext.userState.sync.calcEpochRemainingTime()
+        const time = userContext.calRemainingTime
         setRemainingTime(time)
     }
 
@@ -53,10 +49,6 @@ export default observer(() => {
         }, 1000)
     }, [])
 
-    if (!userContext.userState) {
-        return <div className="container">Loading...</div>
-    }
-
     return (
         <div>
             <h1>Dashboard</h1>
@@ -70,9 +62,7 @@ export default observer(() => {
                     </div>
                     <div className="info-item">
                         <div>Current epoch #</div>
-                        <div className="stat">
-                            {userContext.userState?.sync.calcCurrentEpoch()}
-                        </div>
+                        <div className="stat">{userContext.calEpoch}</div>
                     </div>
                     <div className="info-item">
                         <div>Remaining time</div>
@@ -109,7 +99,7 @@ export default observer(() => {
                                         {(
                                             data >>
                                                 BigInt(
-                                                    userContext.replNonceBits
+                                                    userContext.replNonceBits,
                                                 ) || 0
                                         ).toString()}
                                     </div>
@@ -142,7 +132,7 @@ export default observer(() => {
                                         {(
                                             data >>
                                                 BigInt(
-                                                    userContext.replNonceBits
+                                                    userContext.replNonceBits,
                                                 ) || 0
                                         ).toString()}
                                     </div>
@@ -165,9 +155,7 @@ export default observer(() => {
                                 justifyContent: 'flex-start',
                             }}
                         >
-                            {Array(
-                                userContext.userState.sync.settings.fieldCount
-                            )
+                            {Array(userContext.fieldCount)
                                 .fill(0)
                                 .map((_, i) => {
                                     return (
@@ -180,7 +168,7 @@ export default observer(() => {
                                                 onChange={(event) => {
                                                     if (
                                                         !/^\d*$/.test(
-                                                            event.target.value
+                                                            event.target.value,
                                                         )
                                                     )
                                                         return
@@ -232,16 +220,13 @@ export default observer(() => {
                         <Button
                             onClick={async () => {
                                 if (
-                                    userContext.userState &&
-                                    userContext.userState.sync.calcCurrentEpoch() !==
-                                        (await userContext.userState.latestTransitionedEpoch())
+                                    userContext.id &&
+                                    userContext.calEpoch !==
+                                        userContext.latestTransitionedEpoch
                                 ) {
                                     throw new Error('Needs transition')
                                 }
-                                await userContext.requestData(
-                                    reqData,
-                                    reqInfo.nonce ?? 0
-                                )
+                                userContext.requestData(reqData)
                                 setReqData({})
                             }}
                         >
@@ -266,7 +251,7 @@ export default observer(() => {
                             <h2>Prove Data</h2>
                             <Tooltip text="Users can prove they control some amount of data without revealing exactly how much they control." />
                         </div>
-                        {Array(userContext.userState.sync.settings.fieldCount)
+                        {Array(userContext.fieldCount)
                             .fill(0)
                             .map((_, i) => {
                                 return (
@@ -279,7 +264,7 @@ export default observer(() => {
                                             onChange={(event) => {
                                                 if (
                                                     !/^\d*$/.test(
-                                                        event.target.value
+                                                        event.target.value,
                                                     )
                                                 )
                                                     return
@@ -298,13 +283,13 @@ export default observer(() => {
                                     try {
                                         const proof =
                                             await userContext.proveData(
-                                                proveData
+                                                proveData,
                                             )
                                         setRepProof(proof)
                                     } catch (error) {
                                         console.log(error)
                                         alert(
-                                            'Invalid Proof. You are attempting to prove more data than you have received. Check your provable data, transition if necessary, and try again'
+                                            'Invalid Proof. You are attempting to prove more data than you have received. Check your provable data, transition if necessary, and try again',
                                         )
                                     }
                                 }}

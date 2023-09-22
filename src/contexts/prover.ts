@@ -1,35 +1,24 @@
 import * as snarkjs from 'snarkjs'
 import { SnarkPublicSignals, SnarkProof } from '@unirep/utils'
 import { Circuit } from '@unirep/circuits'
-import { KEY_SERVER } from '../config'
+import vkey from '../../public/dataProof.vkey.json'
 
 export default {
     verifyProof: async (
         circuitName: string | Circuit,
         publicSignals: SnarkPublicSignals,
-        proof: SnarkProof
+        proof: SnarkProof,
     ) => {
-        const url = new URL(`/build/${circuitName}.vkey.json`, KEY_SERVER)
-        const vkey = await fetch(url.toString()).then((r) => r.json())
         return snarkjs.groth16.verify(vkey, publicSignals, proof)
     },
     genProofAndPublicSignals: async (
         circuitName: string | Circuit,
-        inputs: any
+        inputs: any,
     ) => {
-        const wasmUrl = new URL(`${circuitName}.wasm`, KEY_SERVER)
-
-        const wasm = await fetch(wasmUrl.toString()).then((r) =>
-            r.arrayBuffer()
-        )
-        const zkeyUrl = new URL(`${circuitName}.zkey`, KEY_SERVER)
-        const zkey = await fetch(zkeyUrl.toString()).then((r) =>
-            r.arrayBuffer()
-        )
         const { proof, publicSignals } = await snarkjs.groth16.fullProve(
             inputs,
-            new Uint8Array(wasm),
-            new Uint8Array(zkey)
+            `${circuitName}.wasm`,
+            `${circuitName}.zkey`,
         )
         return { proof, publicSignals }
     },
