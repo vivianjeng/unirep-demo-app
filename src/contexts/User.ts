@@ -137,6 +137,9 @@ class User {
     }
 
     stateTransition() {
+        if (this.latestTransitionedEpoch === this.calEpoch()) {
+            throw new Error('Cannot transition to the same epoch')
+        }
         for (let i = 0; i < this.fieldCount; i++) {
             this.provableData[i] = this.data[i]
             localStorage.setItem(
